@@ -15,6 +15,7 @@
   <button id="startBtn">开始录音</button>
   <button id="stopBtn" disabled>结束录音</button>
   <button id="printBtn" disabled>打印Base64</button>
+  <button id="androidDownloadBtn" disabled>下载到安卓</button>
   <div class="log" id="log"></div>
   <script>
     var rec = null;
@@ -45,6 +46,7 @@
         document.getElementById('startBtn').disabled = false;
         document.getElementById('stopBtn').disabled = true;
         document.getElementById('printBtn').disabled = false;
+        document.getElementById('androidDownloadBtn').disabled = false;
         rec.close();
       }, function(err) {
         log('录音结束失败: ' + err);
@@ -57,6 +59,20 @@
         var base64 = reader.result.split(',')[1];
         log('Base64已打印到控制台');
         console.log('录音Base64:', base64);
+      };
+      reader.readAsDataURL(lastBlob);
+    };
+    document.getElementById('androidDownloadBtn').onclick = function() {
+      if (!lastBlob) return;
+      var reader = new FileReader();
+      reader.onloadend = function() {
+        var base64 = reader.result.split(',')[1];
+        log('已调用Java下载方法');
+        if (window.java && typeof window.java.downloadString === 'function') {
+          window.java.downloadString(base64);
+        } else {
+          log('未检测到window.java对象');
+        }
       };
       reader.readAsDataURL(lastBlob);
     };
