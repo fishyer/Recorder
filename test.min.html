@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>极简录音Demo</title>
+  <script src="recorder.mp3.min.js"></script>
+  <style>
+    body { font-family: sans-serif; background: #f5f5f5; text-align: center; padding-top: 80px; }
+    button { margin: 0 10px; padding: 10px 24px; font-size: 18px; border-radius: 4px; border: none; background: #f60; color: #fff; cursor: pointer; }
+    button:active { background: #f00; }
+    .log { margin-top: 30px; color: #333; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <button id="startBtn">开始录音</button>
+  <button id="stopBtn" disabled>结束录音</button>
+  <button id="printBtn" disabled>打印Base64</button>
+  <div class="log" id="log"></div>
+  <script>
+    var rec = null;
+    var lastBlob = null;
+    var log = function(msg) {
+      document.getElementById('log').textContent = msg;
+    };
+    document.getElementById('startBtn').onclick = function() {
+      if (rec && Recorder.IsOpen()) {
+        rec.close();
+      }
+      rec = Recorder({ type: 'mp3' });
+      rec.open(function() {
+        rec.start();
+        log('录音中...');
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('stopBtn').disabled = false;
+        document.getElementById('printBtn').disabled = true;
+      }, function(err) {
+        log('录音权限获取失败: ' + err);
+      });
+    };
+    document.getElementById('stopBtn').onclick = function() {
+      if (!rec) return;
+      rec.stop(function(blob) {
+        lastBlob = blob;
+        log('录音结束，可打印Base64');
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('stopBtn').disabled = true;
+        document.getElementById('printBtn').disabled = false;
+        rec.close();
+      }, function(err) {
+        log('录音结束失败: ' + err);
+      });
+    };
+    document.getElementById('printBtn').onclick = function() {
+      if (!lastBlob) return;
+      var reader = new FileReader();
+      reader.onloadend = function() {
+        var base64 = reader.result.split(',')[1];
+        log('Base64已打印到控制台');
+        console.log('录音Base64:', base64);
+      };
+      reader.readAsDataURL(lastBlob);
+    };
+  </script>
+</body>
+</html> 
