@@ -72,6 +72,11 @@
           window.java.downloadString(base64);
         } else {
           log('未检测到window.java对象');
+          // 直接用js下载
+          var a = document.createElement('a');
+          a.href = 'data:audio/mp3;base64,' + base64;
+          a.download = 'audio.mp3';
+          a.click();
         }
       };
       reader.readAsDataURL(lastBlob);
